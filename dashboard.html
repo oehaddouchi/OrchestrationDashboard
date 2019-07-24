@@ -3,7 +3,7 @@
 
 <head>
     <meta charset='utf-8'>
-    <title>Force Layout Example 1</title>
+    <title>Orchestration Dashboard</title>
     <style>
         text {
             font-weight: 300;
@@ -98,66 +98,70 @@
                 }
             ];
 
-            var tbl_body = ['<table class="table">'];
-            tbl_body.push('<thead><tr>');
-            tbl_body.push('<th scope="col">QualifiedWorkflowId</th>');
-            tbl_body.push('<th scope="col">WorkflowResult</th>');
-            tbl_body.push('<th scope="col">EndTime</th>');
-            tbl_body.push('</tr></thead>');
-            tbl_body.push('<tbody>');
+            showTasksModal(json_tasks);
 
-            $.each(json_tasks, function () {
-                var tbl_row = "";
-                var classHolder = "alert ";
+            function showTasksModal(json_tasks) {
+                var tbl_body = ['<table class="table">'];
+                tbl_body.push('<thead><tr>');
+                tbl_body.push('<th scope="col">QualifiedWorkflowId</th>');
+                tbl_body.push('<th scope="col">WorkflowResult</th>');
+                tbl_body.push('<th scope="col">EndTime</th>');
+                tbl_body.push('</tr></thead>');
+                tbl_body.push('<tbody>');
 
-                $.each(this, function (k, v) {
+                $.each(json_tasks, function () {
+                    var tbl_row = "";
+                    var classHolder = "alert ";
 
-                    if (k == "QualifiedWorkflowId") {
-                        if (v) {
-                            tbl_row += '<th scope="row">' + v + '</th>';
+                    $.each(this, function (k, v) {
+
+                        if (k == "QualifiedWorkflowId") {
+                            if (v) {
+                                tbl_row += '<th scope="row">' + v + '</th>';
+                            }
+                            else {
+                                tbl_row += '<th scope="row"></th>';
+                            }
+                        }
+                        else if (k == "WorkflowResult") {
+                            switch (v) {
+                                case "Succeeded":
+                                    classHolder += " alert-success";
+                                    tbl_row += "<td><span class=\"glyphicon glyphicon-ok\"></span> " + v + "</td>";
+                                    break;
+
+                                case "Failed":
+                                    classHolder += " alert-danger";
+                                    tbl_row += "<td><span class=\"glyphicon glyphicon-remove\"></span> " + v + "</td>";
+                                    break;
+
+                                default:
+                                    if (v) {
+                                        tbl_row += "<td><span class=\"glyphicon glyphicon-alert\"></span> " + v + "</td>";
+                                    }
+                                    else {
+                                        tbl_row += "<td><span class=\"glyphicon glyphicon-alert\"></span></td>";
+                                    }
+                            }
                         }
                         else {
-                            tbl_row += '<th scope="row"></th>';
+                            if (v) {
+                                tbl_row += "<td>" + v + "</td>";
+                            }
+                            else {
+                                tbl_row += "<td></td>";
+                            }
                         }
-                    }
-                    else if (k == "WorkflowResult") {
-                        switch (v) {
-                            case "Succeeded":
-                                classHolder += " alert-success";
-                                tbl_row += "<td><span class=\"glyphicon glyphicon-ok\"></span> " + v + "</td>";
-                                break;
-                                
-                            case "Failed":
-                                classHolder += " alert-danger";
-                                tbl_row += "<td><span class=\"glyphicon glyphicon-remove\"></span> " + v + "</td>";
-                                break;
+                    })
 
-                            default:
-                                if (v) {
-                                    tbl_row += "<td><span class=\"glyphicon glyphicon-alert\"></span> " + v + "</td>";
-                                }
-                                else {
-                                    tbl_row += "<td><span class=\"glyphicon glyphicon-alert\"></span></td>";
-                                }
-                        }
-                    }
-                    else {
-                        if (v) {
-                            tbl_row += "<td>" + v + "</td>";
-                        }
-                        else {
-                            tbl_row += "<td></td>";
-                        }
-                    }
-                })
+                    tbl_body.push("<tr class=\"" + classHolder + "\">" + tbl_row + "</tr>");
+                });
 
-                tbl_body.push("<tr class=\"" + classHolder + "\">" + tbl_row + "</tr>");
-            });
+                tbl_body.push('</tbody>');
 
-            tbl_body.push('</tbody>');
-
-            $('.modal-body').html(tbl_body.join(""));
-            $('#modalPopUp').modal('toggle');
+                $('.modal-body').html(tbl_body.join(""));
+                $('#modalPopUp').modal('toggle');
+            }
         }); 
     </script>
     <script>
