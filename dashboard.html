@@ -126,16 +126,28 @@
                                 classHolder += " alert-success";
                                 tbl_row += "<td><span class=\"glyphicon glyphicon-ok\"></span> " + v + "</td>";
                                 break;
+                                
                             case "Failed":
                                 classHolder += " alert-danger";
                                 tbl_row += "<td><span class=\"glyphicon glyphicon-remove\"></span> " + v + "</td>";
                                 break;
+
                             default:
-                                tbl_row += "<td><span class=\"glyphicon glyphicon-alert\"></span> " + v + "</td>";
+                                if (v) {
+                                    tbl_row += "<td><span class=\"glyphicon glyphicon-alert\"></span> " + v + "</td>";
+                                }
+                                else {
+                                    tbl_row += "<td><span class=\"glyphicon glyphicon-alert\"></span></td>";
+                                }
                         }
                     }
                     else {
-                        tbl_row += "<td>" + v + "</td>";
+                        if (v) {
+                            tbl_row += "<td>" + v + "</td>";
+                        }
+                        else {
+                            tbl_row += "<td></td>";
+                        }
                     }
                 })
 
