@@ -4,45 +4,12 @@
 <head>
     <meta charset='utf-8'>
     <title>Orchestration Dashboard</title>
-    <style>
-        text {
-            font-weight: 300;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            font-size: 14px;
-        }
-
-        .node rect {
-            stroke: #999;
-            fill: #fff;
-            stroke-width: 1.5px;
-        }
-
-        .edgePath {
-            fill: grey;
-        }
-
-        .edgePath path {
-            stroke: grey;
-            stroke-width: 1.5px;
-        }
-
-        g.Succeeded>rect {
-            fill: #dff0d8;
-        }
-
-        g.Failed>rect {
-            fill: #f8d7da;
-        }
-
-        g.Processing>rect {
-            fill: #fff3cd;
-        }
-    </style>
 </head>
 
-<body>
+<body style="height:100%; width: 100%;">
+        <div class="loader"></div>
     <p class="h2">Orchestration Dashboard</p>
-    <svg id="svg-canvas" width="1200" height="1000"></svg>
+    <svg id="svg-canvas" width="100%" height="100%"></svg>
 
 
     <!-- Modal -->
@@ -68,130 +35,36 @@
 
     <script src="https://d3js.org/d3.v4.min.js" charset="utf-8"></script>
     <script src="js/dagre-d3.min.js" charset="utf-8"></script>
-    <link rel="stylesheet" href="css/demo.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js"></script>
 
     <script>
-        $(document).on('click', '.node', function () {
-            //alert("hey!");
+        $(window).load(function () {
+            // Animate loader off screen
+            $(".loader").fadeOut("slow");
+            //$("svg").show();
+        });
 
-            //get the scope id
-            var scope_id = $(this).attr("id");
-
-            //TO DO: make api call, get json object
-            var json_tasks = [
-                {
-                    "QualifiedWorkflowId": "0",
-                    "WorkflowResult": "Succeeded",
-                    "EndTime": "7/19/2019 9:47:46 PM"
-                },
-                {
-                    "QualifiedWorkflowId": "1",
-                    "WorkflowResult": "Failed",
-                    "EndTime": "7/19/2019 10:47:46 PM"
-                },
-                {
-                    "QualifiedWorkflowId": "2",
-                    "WorkflowResult": "Canceled",
-                    "EndTime": "7/19/2019 10:47:46 PM"
-                },
-                {
-                    "QualifiedWorkflowId": "3",
-                    "WorkflowResult": "NotStarted",
-                    "EndTime": "7/19/2019 10:47:46 PM"
-                }
-            ];
-
-            showTasksModal(json_tasks);
-
-            //builds the Tasks table from a given `json_tasks`
-            function showTasksModal(json_tasks) {
-                var tbl_body = ['<table class="table">'];
-                tbl_body.push('<thead><tr>');
-                tbl_body.push('<th scope="col">QualifiedWorkflowId</th>');
-                tbl_body.push('<th scope="col">WorkflowResult</th>');
-                tbl_body.push('<th scope="col">EndTime</th>');
-                tbl_body.push('</tr></thead>');
-                
-                tbl_body.push('<tbody>');
-
-                $.each(json_tasks, function () {
-                    var tbl_row = "";
-                    var classHolder = "alert ";
-
-                    $.each(this, function (k, v) {
-
-                        if (k == "QualifiedWorkflowId") {
-                            if (v) {
-                                tbl_row += '<th scope="row">' + v + '</th>';
-                            }
-                            else {
-                                tbl_row += '<th scope="row"></th>';
-                            }
-                        }
-                        else if (k == "WorkflowResult") {
-                            switch (v) {
-                                case "Succeeded":
-                                    classHolder += " alert-success";
-                                    tbl_row += "<td><span class=\"glyphicon glyphicon-ok\"></span> " + v + "</td>";
-                                    break;
-
-                                case "Failed":
-                                    classHolder += " alert-danger";
-                                    tbl_row += "<td><span class=\"glyphicon glyphicon-remove\"></span> " + v + "</td>";
-                                    break;
-
-                                case "NotStarted":
-                                    classHolder += " alert-alert";
-                                    tbl_row += "<td>" + v + "</td>";
-                                    break;
-
-                                default:
-                                    if (v) {
-                                        classHolder += " alert-warning";
-                                        tbl_row += "<td><span class=\"glyphicon glyphicon-alert\"></span> " + v + "</td>";
-                                    }
-                                    else {
-                                        classHolder += " alert-alert";
-                                        tbl_row += "<td></td>";
-                                    }
-                            }
-                        }
-                        else {
-                            if (v) {
-                                tbl_row += "<td>" + v + "</td>";
-                            }
-                            else {
-                                tbl_row += "<td></td>";
-                            }
-                        }
-                    })
-
-                    tbl_body.push("<tr class=\"" + classHolder + "\">" + tbl_row + "</tr>");
-                });
-
-                tbl_body.push('</tbody>');
-
-                $('.modal-body').html(tbl_body.join(""));
-                $('#modalPopUp').modal('toggle');
-            }
-        }); 
-    </script>
-    <script>
         //make the api call
-        var nodes_api_url = "http://orchdashboard.azurewebsites.net/api/orchestrations";
+        var api_url = "http://orchdashboard.azurewebsites.net/api/orchestrations";
+        var json_data = apiCall(api_url, buildGraph);
 
-        //use cors-anywhere.herokuapp to avoid “No Access-Control-Allow-Origin header” problems
-        const proxyurl = "https://cors-anywhere.herokuapp.com/";
-        nodes_json = fetch(proxyurl + nodes_api_url) // https://cors-anywhere.herokuapp.com/http://orchdashboard.azurewebsites.net/api/orchestrations
-            .then(response => response.text())
-            .then(contents => {
-                buildGraph(contents);
-            })
-            .catch(() => console.log("Can’t access " + nodes_api_url + " response. Blocked by browser?"))
-
+        function apiCall(url, callback) {
+            //use cors-anywhere.herokuapp to avoid “No Access-Control-Allow-Origin header” problems
+            const proxyurl = "https://cors-anywhere.herokuapp.com/";
+            nodes_json = fetch(proxyurl + url) // https://cors-anywhere.herokuapp.com/http://orchdashboard.azurewebsites.net/api/orchestrations
+                .then(response => response.text())
+                .then(contents => {
+                    callback(contents);
+                })
+                .catch(() => {
+                    console.log("Can’t access " + url + " response. Blocked by browser?");
+                    return undefined;
+                })
+        }
 
         function buildGraph(contents) {
             var json_data = JSON.parse(contents);
@@ -233,6 +106,93 @@
             var xCenterOffset = (svg.attr("width") - g.graph().width) / 2;
             svgGroup.attr("transform", "translate(" + xCenterOffset + ", 20)");
             svg.attr("height", g.graph().height + 40);
+            svg.attr("width", g.graph().width + 40);
+        }
+    </script>
+
+    <script>
+
+        $(document).on('click', '.node', function () {
+            var tasks_api_url = "http://orchdashboard.azurewebsites.net/api/workflows?scopeId=";
+
+            //get the scope id
+            var scope_id = $(this).attr("id");
+
+            var contents = apiCall(tasks_api_url + scope_id, showTasksModal);
+            console.log(tasks_api_url + scope_id);
+        });
+
+        //builds the Tasks table from a given `json_tasks`
+        function showTasksModal(contents) {
+            var json_tasks = JSON.parse(contents);
+            var tbl_body = ['<table class="table">'];
+            tbl_body.push('<thead><tr>');
+            tbl_body.push('<th scope="col">QualifiedWorkflowId</th>');
+            tbl_body.push('<th scope="col">WorkflowResult</th>');
+            tbl_body.push('<th scope="col">EndTime</th>');
+            tbl_body.push('</tr></thead>');
+
+            tbl_body.push('<tbody>');
+
+            $.each(json_tasks, function () {
+                var tbl_row = "";
+                var classHolder = "alert ";
+
+                $.each(this, function (k, v) {
+
+                    if (k == "QualifiedWorkflowId") {
+                        if (v) {
+                            tbl_row += '<th scope="row">' + v + '</th>';
+                        }
+                        else {
+                            tbl_row += '<th scope="row"></th>';
+                        }
+                    }
+                    else if (k == "WorkflowResult") {
+                        switch (v) {
+                            case "Succeeded":
+                                classHolder += " alert-success";
+                                tbl_row += "<td><span class=\"glyphicon glyphicon-ok\"></span> " + v + "</td>";
+                                break;
+
+                            case "Failed":
+                                classHolder += " alert-danger";
+                                tbl_row += "<td><span class=\"glyphicon glyphicon-remove\"></span> " + v + "</td>";
+                                break;
+
+                            case "NotStarted":
+                                classHolder += " alert-alert";
+                                tbl_row += "<td>" + v + "</td>";
+                                break;
+
+                            default:
+                                if (v) {
+                                    classHolder += " alert-warning";
+                                    tbl_row += "<td><span class=\"glyphicon glyphicon-alert\"></span> " + v + "</td>";
+                                }
+                                else {
+                                    classHolder += " alert-alert";
+                                    tbl_row += "<td></td>";
+                                }
+                        }
+                    }
+                    else {
+                        if (v) {
+                            tbl_row += "<td>" + v + "</td>";
+                        }
+                        else {
+                            tbl_row += "<td></td>";
+                        }
+                    }
+                })
+
+                tbl_body.push("<tr class=\"" + classHolder + "\">" + tbl_row + "</tr>");
+            });
+
+            tbl_body.push('</tbody>');
+
+            $('.modal-body').html(tbl_body.join(""));
+            $('#modalPopUp').modal('toggle');
         }
     </script>
 </body>
