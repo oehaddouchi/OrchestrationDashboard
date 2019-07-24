@@ -5,11 +5,6 @@
     <meta charset='utf-8'>
     <title>Force Layout Example 1</title>
     <style>
-        /* This sets the color for "TK" nodes to a light blue green. */
-        g.type-TK>rect {
-            fill: #00ffd0;
-        }
-
         text {
             font-weight: 300;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -31,15 +26,15 @@
             stroke-width: 1.5px;
         }
 
-        .Succeeded rect {
+        g.Succeeded>rect {
             fill: #4fff52;
         }
 
-        .Failed rect {
+        g.Failed>rect {
             fill: red;
         }
 
-        .Processing rect {
+        g.Processing>rect {
             fill: orange;
         }
     </style>
