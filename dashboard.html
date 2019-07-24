@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>Force Layout Example 1</title>
+    <style>
+        /* This sets the color for "TK" nodes to a light blue green. */
+        g.type-TK>rect {
+            fill: #00ffd0;
+        }
+
+        text {
+            font-weight: 300;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .node rect {
+            stroke: #999;
+            fill: #fff;
+            stroke-width: 1.5px;
+        }
+
+        .edgePath {
+            fill: grey;
+        }
+
+        .edgePath path {
+            stroke: grey;
+            stroke-width: 1.5px;
+        }
+
+        .Succeeded rect {
+            fill: #4fff52;
+        }
+
+        .Failed rect {
+            fill: red;
+        }
+
+        .Processing rect {
+            fill: orange;
+        }
+    </style>
+</head>
+
+<body>
+    <svg id="svg-canvas" width="1200" height="1000"></svg>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalPopUp" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="exampleModalLabel">Tasks</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+    <script src="js/dagre-d3.min.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="css/demo.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+
+    <script>
+        $(document).on('click', '.node', function () {
+            //alert("hey!");
+
+            //get the scope id
+            var scope_id = $(this).attr("id");
+            //make api call, get json object
+
+            var json_tasks = [
+                {
+                    "QualifiedWorkflowId": "0",
+                    "WorkflowResult": "Succeeded",
+                    "EndTime": "7/19/2019 9:47:46 PM"
+                },
+                {
+                    "QualifiedWorkflowId": "1",
+                    "WorkflowResult": "Failed",
+                    "EndTime": "7/19/2019 10:47:46 PM"
+                }
+            ];
+
+            var tbl_body = ['<table class="table">'];
+            tbl_body.push('<thead><tr>');
+            tbl_body.push('<th scope="col">QualifiedWorkflowId</th>');
+            tbl_body.push('<th scope="col">WorkflowResult</th>');
+            tbl_body.push('<th scope="col">EndTime</th>');
+            tbl_body.push('</tr></thead>');
+            tbl_body.push('<tbody>');
+
+            $.each(json_tasks, function () {
+                var tbl_row = "";
+                $.each(this, function (k, v) {
+                    if (k == "QualifiedWorkflowId") {
+                        tbl_row += '<th scope="row">' + v + '</th>';
+                    }
+                    else {
+                        tbl_row += "<td>" + v + "</td>";
+                    }
+                })
+
+                tbl_body.push("<tr class=\"" + "\">" + tbl_row + "</tr>");
+            });
+
+            tbl_body.push('</tbody>');
+
+            $('.modal-body').html(tbl_body.join(""));
+            $('#modalPopUp').modal('toggle');
+        }); 
+    </script>
+    <script>
+        var nodes_api_url = "http://orchdashboard.azurewebsites.net/api/orchestrations";
+
+        const proxyurl = "https://cors-anywhere.herokuapp.com/";
+        nodes_json = fetch(proxyurl + nodes_api_url) // https://cors-anywhere.herokuapp.com/http://orchdashboard.azurewebsites.net/api/orchestrations
+            .then(response => response.text())
+            .then(contents => {
+                buildGraph(contents);
+            })
+            .catch(() => console.log("Can’t access " + nodes_api_url + " response. Blocked by browser?"))
+
+
+        function buildGraph(contents) {
+            var json_data = JSON.parse(contents);
+            console.log(json_data);
+
+            // Create the input graph
+            var g = new dagreD3.graphlib.Graph()
+                .setGraph({})
+                .setDefaultEdgeLabel(function () { return {}; });
+
+            //add nodes
+            json_data.Nodes.forEach((node) => {
+                console.log(node);
+                g.setNode(node.Id, { label: node.Name, class: node.Status, id: node.Id });
+            })
+
+
+            g.nodes().forEach(function (v) {
+                var node = g.node(v);
+                // Round the corners of the nodes
+                node.rx = node.ry = 8;
+            });
+
+            // Set up edges, no special attributes.
+
+            json_data.Links.forEach((link) => {
+                g.setEdge(link.Source, link.Target);
+            })
+
+            // Create the renderer
+            var render = new dagreD3.render();
+
+            // Set up an SVG group so that we can translate the final graph.
+            var svg = d3.select("svg"),
+                svgGroup = svg.append("g");
+
+            // Run the renderer. This is what draws the final graph.
+            render(d3.select("svg g"), g);
+
+            // Center the graph
+            var xCenterOffset = (svg.attr("width") - g.graph().width) / 2;
+            svgGroup.attr("transform", "translate(" + xCenterOffset + ", 20)");
+            svg.attr("height", g.graph().height + 40);
+        }
+    </script>
+</body>
+
+</html>
