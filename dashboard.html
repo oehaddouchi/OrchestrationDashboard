@@ -41,6 +41,7 @@
 </head>
 
 <body>
+    <p class="h2">Orchestration Dashboard</p>
     <svg id="svg-canvas" width="1200" height="1000"></svg>
 
 
@@ -78,8 +79,8 @@
 
             //get the scope id
             var scope_id = $(this).attr("id");
-            //make api call, get json object
 
+            //TO DO: make api call, get json object
             var json_tasks = [
                 {
                     "QualifiedWorkflowId": "0",
@@ -95,11 +96,17 @@
                     "QualifiedWorkflowId": "2",
                     "WorkflowResult": "Canceled",
                     "EndTime": "7/19/2019 10:47:46 PM"
+                },
+                {
+                    "QualifiedWorkflowId": "3",
+                    "WorkflowResult": "NotStarted",
+                    "EndTime": "7/19/2019 10:47:46 PM"
                 }
             ];
 
             showTasksModal(json_tasks);
 
+            //builds the Tasks table from a given `json_tasks`
             function showTasksModal(json_tasks) {
                 var tbl_body = ['<table class="table">'];
                 tbl_body.push('<thead><tr>');
@@ -107,6 +114,7 @@
                 tbl_body.push('<th scope="col">WorkflowResult</th>');
                 tbl_body.push('<th scope="col">EndTime</th>');
                 tbl_body.push('</tr></thead>');
+                
                 tbl_body.push('<tbody>');
 
                 $.each(json_tasks, function () {
@@ -135,12 +143,19 @@
                                     tbl_row += "<td><span class=\"glyphicon glyphicon-remove\"></span> " + v + "</td>";
                                     break;
 
+                                case "NotStarted":
+                                    classHolder += " alert-alert";
+                                    tbl_row += "<td>" + v + "</td>";
+                                    break;
+
                                 default:
                                     if (v) {
+                                        classHolder += " alert-warning";
                                         tbl_row += "<td><span class=\"glyphicon glyphicon-alert\"></span> " + v + "</td>";
                                     }
                                     else {
-                                        tbl_row += "<td><span class=\"glyphicon glyphicon-alert\"></span></td>";
+                                        classHolder += " alert-alert";
+                                        tbl_row += "<td></td>";
                                     }
                             }
                         }
@@ -165,8 +180,10 @@
         }); 
     </script>
     <script>
+        //make the api call
         var nodes_api_url = "http://orchdashboard.azurewebsites.net/api/orchestrations";
 
+        //use cors-anywhere.herokuapp to avoid “No Access-Control-Allow-Origin header” problems
         const proxyurl = "https://cors-anywhere.herokuapp.com/";
         nodes_json = fetch(proxyurl + nodes_api_url) // https://cors-anywhere.herokuapp.com/http://orchdashboard.azurewebsites.net/api/orchestrations
             .then(response => response.text())
@@ -178,7 +195,6 @@
 
         function buildGraph(contents) {
             var json_data = JSON.parse(contents);
-            console.log(json_data);
 
             // Create the input graph
             var g = new dagreD3.graphlib.Graph()
@@ -187,7 +203,6 @@
 
             //add nodes
             json_data.Nodes.forEach((node) => {
-                console.log(node);
                 g.setNode(node.Id, { label: node.Name, class: node.Status, id: node.Id });
             })
 
