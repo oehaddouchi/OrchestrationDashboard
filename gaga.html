@@ -52,6 +52,20 @@
         var api_url = "http://orchdashboard.azurewebsites.net/api/orchestrations";
         var json_data = apiCall(api_url, buildGraph);
 
+        function proxyApiCall(url, callback) {
+            //use cors-anywhere.herokuapp to avoid “No Access-Control-Allow-Origin header” problems
+            const proxyurl = "https://cors-anywhere.herokuapp.com/";
+            nodes_json = fetch(proxyurl + url) // https://cors-anywhere.herokuapp.com/http://orchdashboard.azurewebsites.net/api/orchestrations
+                .then(response => response.text())
+                .then(contents => {
+                    callback(contents);
+                })
+                .catch(() => {
+                    console.log("Can’t access " + url + " response. Blocked by browser?");
+                    return undefined;
+                })
+        }
+
         function apiCall(url, callback) {
             nodes_json = fetch(url)
                 .then(response => response.text())
