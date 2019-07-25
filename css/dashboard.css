@@ -1,9 +1,18 @@
+html {
+  margin: 0;
+  height: 100%;
+}
+
 body {
-  width: 960px;
+  /*width: 960px;
   margin: 0 auto;
+  overflow-x:auto;
+  overflow-y:scroll; */
   color: #333;
   font-weight: 300;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
+  height: 100%;
+  width: 100%;
 }
 
 h1 {
@@ -25,9 +34,9 @@ section p {
 }
 
 svg {
-  border: 1px solid #ccc;
-  overflow: scroll;
-  margin: 0 auto;
+  border: 3px solid #ccc;
+  float:left;
+  /*margin: 0 auto;*/
 }
 
 pre {
