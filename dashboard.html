@@ -39,7 +39,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js"></script>
 
     <script>
         $(window).load(function () {
@@ -49,7 +49,7 @@
         });
 
         //make the api call
-        var api_url = "http://orchdashboard.azurewebsites.net/api/orchestrations";
+        var api_url = "https://orchdashboard.azurewebsites.net/api/orchestrations";
         var json_data = apiCall(api_url, buildGraph);
 
         function apiCall(url, callback) {
@@ -111,7 +111,7 @@
     <script>
 
         $(document).on('click', '.node', function () {
-            var tasks_api_url = "http://orchdashboard.azurewebsites.net/api/workflows?scopeId=";
+            var tasks_api_url = "https://orchdashboard.azurewebsites.net/api/workflows?scopeId=";
 
             //get the scope id
             var scope_id = $(this).attr("id");
