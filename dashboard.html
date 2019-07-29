@@ -119,6 +119,7 @@
             // Run the renderer. This is what draws the final graph.
             render(d3.select("svg g"), g);
 
+            //add a tooltip to each node displaying it's Status 
             $('g.node').each(function (i, obj) {
                 var scopeId = $(this).attr("id");
                 $(this).attr("class", $(this).attr('class') + " tooltip");
