@@ -102,6 +102,7 @@
                 g.setEdge(link.Source, link.Target);
             })
 
+            //set the minlen attr to 2 for every edge
             g.edges().forEach(function(v) {
                 var edge = g.edge(v);
 
