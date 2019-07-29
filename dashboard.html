@@ -80,24 +80,33 @@
                 .setDefaultEdgeLabel(function () { return {}; });
 
             var nodesMapStatus = new Map();
+            var nodesMapType = new Map();
             //add nodes
             json_data.Nodes.forEach((node) => {
                 nodesMapStatus.set(node.Id, node.Status);
+                nodesMapType.set(node.Id, node.Type);
                 g.setNode(node.Id, { label: node.Name, class: node.Status, id: node.Id });
             })
 
 
             g.nodes().forEach(function (v) {
                 var node = g.node(v);
-                // Round the corners of the nodes
-                node.rx = node.ry = 8;
+                if(nodesMapType.get(v.id) !== "Approval") {
+                    // Round the corners of the nodes
+                    node.rx = node.ry = 8;
+                }
             });
 
             // Set up edges, no special attributes.
-
             json_data.Links.forEach((link) => {
                 g.setEdge(link.Source, link.Target);
             })
+
+            g.edges().forEach(function(v) {
+                var edge = g.edge(v);
+
+                edge.minlen = 2;
+            });
 
             // Create the renderer
             var render = new dagreD3.render();
@@ -108,9 +117,6 @@
 
             // Run the renderer. This is what draws the final graph.
             render(d3.select("svg g"), g);
-
-            //add tooltips to nodes
-            var nodeElements = d3.select("svg g.node");
 
             $('g.node').each(function (i, obj) {
                 var scopeId = $(this).attr("id");
@@ -174,8 +180,6 @@
 
             tbl_header.push('<div class="table-responsive"><table class="table">');
             tbl_header.push('<thead><tr>');
-            tbl_header.push('<th scope="col">QualifiedWorkflowId</th>');
-            tbl_header.push('<th scope="col">WorkflowResult</th>');
 
             var header_completed = false;
 
@@ -224,10 +228,6 @@
                         }
                     }
                     else {
-                        if (!header_completed) {
-                            tbl_header.push('<th scope="col">' + k + '</th>');
-                        }
-
                         if (v) {
                             tbl_row += "<td>" + v + "</td>";
                         }
@@ -235,7 +235,11 @@
                             tbl_row += "<td></td>";
                         }
                     }
-                })
+
+                    if (!header_completed) {
+                            tbl_header.push('<th scope="col">' + k + '</th>');
+                    }
+                });
 
                 if (!header_completed) {
                     tbl_header.push('</tr></thead>');
